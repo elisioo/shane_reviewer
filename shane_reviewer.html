@@ -1049,6 +1049,16 @@
           review: "https://clinchem-hgfz.vercel.app/",
           challenge: "https://clinchem-hgfz.vercel.app/pages",
         },
+        {
+          id: "immunosero",
+          label: "Immunology & Serology",
+          caption: "Immunity & antibodies",
+          art: "sci",
+          emoji: "",
+          color: "blue",
+          review: "reviewer/immuno_sero_1.html",
+          challenge: "reviewer/immuno_sero_1.html",
+        },
       ];
       var ARTS = [
           "sci",
@@ -1090,7 +1100,11 @@
           var r = localStorage.getItem(KEY);
           if (r) {
             var d = JSON.parse(r);
-            if (Array.isArray(d)) return d;
+            if (Array.isArray(d)) {
+              if (!d.some(function (x) { return x.id === "immunosero"; }))
+                d.push(JSON.parse(JSON.stringify(DEF[2])));
+              return d;
+            }
           }
         } catch (e) {}
         return JSON.parse(JSON.stringify(DEF));
@@ -1109,7 +1123,14 @@
         return esc(s).replace(/"/g, "&quot;");
       }
       function safe(u) {
-        return /^https?:\/\//i.test(u) ? u : "";
+        var v = String(u || "").trim();
+        if (!v) return "";
+        try {
+          var protocol = new URL(v, location.href).protocol;
+          return /^(?:https?:|file:)$/i.test(protocol) ? v : "";
+        } catch (e) {
+          return "";
+        }
       }
       function setImgs() {
         document.querySelectorAll("[data-img]").forEach(function (e) {
@@ -1305,7 +1326,11 @@
       }
       function fix(v) {
         v = v.trim();
-        if (v && !/^https?:\/\//i.test(v)) v = "https://" + v;
+        if (
+          v &&
+          !/^(?:https?:\/\/|file:\/\/|\.{0,2}\/|[a-z]:[\\/])/i.test(v)
+        )
+          v = "https://" + v;
         return v;
       }
       document.getElementById("bSave").onclick = function () {
